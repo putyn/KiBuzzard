@@ -4404,49 +4404,13 @@ class Arc(Curve):
         self.sweep = -self.sweep
 
     def npoint(self, positions):
-        try:
-            import numpy as np
-            return self._points_numpy(np.array(positions))
-        except ImportError:
-            if self.start == self.end and self.sweep == 0:
-                # This is equivalent of omitting the segment
-                return [self.start] * len(positions)
-
-            start_t = self.get_start_t()
-            return [self.start if pos == 0 else self.end if pos == 1 else
-            self.point_at_t(start_t + self.sweep * pos) for pos in positions]
-
-    def _points_numpy(self, positions):
-        """Vectorized version of `point()`.
-
-        :param positions: 1D numpy array of float in [0, 1]
-        :return: 1D numpy array of complex
-        """
-        import numpy as np
-        xy = np.empty((len(positions), 2), dtype=float)
-
         if self.start == self.end and self.sweep == 0:
-            xy[:, 0], xy[:, 1] = self.start
-        else:
-            t = self.get_start_t() + self.sweep * positions
+            # This is equivalent of omitting the segment
+            return [self.start] * len(positions)
 
-            rotation = self.get_rotation()
-            a = self.rx
-            b = self.ry
-            cx = self.center.x
-            cy = self.center.y
-            cos_rot = cos(rotation)
-            sin_rot = sin(rotation)
-            cos_t = np.cos(t)
-            sin_t = np.sin(t)
-            xy[:, 0] = cx + a * cos_t * cos_rot - b * sin_t * sin_rot
-            xy[:, 1] = cy + a * cos_t * sin_rot + b * sin_t * cos_rot
-
-            # ensure clean endings
-            xy[positions == 0, :] = list(self.start)
-            xy[positions == 1, :] = list(self.end)
-
-        return xy
+        start_t = self.get_start_t()
+        return [self.start if pos == 0 else self.end if pos == 1 else
+        self.point_at_t(start_t + self.sweep * pos) for pos in positions]
 
     def _integral_length(self):
         def ellipse_part_integral(t1, t2, a, b, n=100000):

@@ -127,6 +127,9 @@ def polygon(*points):
     return Path(*[Line(points[i], points[(i + 1) % len(points)])
                   for i in range(len(points))])
 
+def clip(value, valueMin, valueMax):
+    return min(max(value, valueMin), valueMax)
+
 # Conversion###################################################################
 
 def bpoints2bezier(bpoints):
@@ -1476,8 +1479,8 @@ class Arc(object):
         u2 = (-x1p - cp.real)/rx + 1j*(-y1p - cp.imag)/ry  # transformed end
 
         # clip in case of floating point error
-        u1 = np.clip(u1.real, -1, 1) + 1j*np.clip(u1.imag, -1, 1)
-        u2 = np.clip(u2.real, -1, 1) + 1j * np.clip(u2.imag, -1, 1)
+        u1 = clip(u1.real, -1, 1) + 1j * clip(u1.imag, -1, 1)
+        u2 = clip(u2.real, -1, 1) + 1j * clip(u2.imag, -1, 1)
 
         # Now compute theta and delta (we'll define them as we go)
         # delta is the angular distance of the arc (w.r.t the circle)
@@ -1499,7 +1502,7 @@ class Arc(object):
         det_uv = u1.real*u2.imag - u1.imag*u2.real
 
         acosand = u1.real*u2.real + u1.imag*u2.imag
-        acosand = np.clip(acosand.real, -1, 1) + np.clip(acosand.imag, -1, 1)
+        acosand = clip(acosand.real, -1, 1) + clip(acosand.imag, -1, 1)
         
         if det_uv > 0:
             self.delta = degrees(acos(acosand))
